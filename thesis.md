@@ -1,3 +1,7 @@
+---
+typora-copy-images-to: ./figures
+---
+
 [TOC]
 
 ## CNN的正则化方法分析和特征扩增
@@ -183,6 +187,31 @@ batch-size太大会使得训练时间成比例的增加，太小则导致计算�
 
 ##### 3.2.3 分析
 
+![bs-global_stepsec2](/Users/O/Documents/git_rep/thesis/figures/bs-global_stepsec2.png)
+
+训练速度和batch-size呈现近似线性关系，batch-size为32时，每秒钟更新120次，而batch-size扩大到4096时，每秒钟的更新次数下降为18左右。
+
+![bs-lossesclone_0softmax_cross_entropy_lossvalue2](/Users/O/Documents/git_rep/thesis/figures/bs-lossesclone_0softmax_cross_entropy_lossvalue2.png)
+
+实验考虑了八种batch-size的取值，为了避免曲线重叠干扰观察，我们将其分为了两组，分别画在两个坐标系里，如上图所示。尽管batch-size的取值跨越三个数量级，但是损失函数都可以在波动中保持下降的趋势，这说明了使用小批量的数据确实可以得到可用的梯度估计。最明显的不同点是，batch-size越大，训练过程越稳定。其取值为几十时，损失函数上下波动十分剧烈，甚至在训练后期学习率很小时仍然不能收敛，此时模型表现为欠拟合；而其被设置为一千以上时，损失函数的变化过程接近平滑的曲线，训练可以达到收敛。另外，小批量训练的收敛速度并不比大批量快，这说明噪声帮助训练过程逃离鞍点的说法并不可靠，实际上在神经网络这样的特别高维空间里，达到鞍点的概率是非常小的，因为那要求在每一个维度上的导数都等于零。
+
+![bs-evalValLoss2](/Users/O/Documents/git_rep/thesis/figures/bs-evalValLoss2.png)
+
+![bs-evalAccuracy2](/Users/O/Documents/git_rep/thesis/figures/bs-evalAccuracy2.png)
+
+代表泛化能力的验证集性能方面，随着batch-size增加，识别率先上升后下降，交叉熵先下降后上升。这个结果符合预期。一方面，极小批量（几十）训练的模型的验证集表现较差，这应该是不准确的梯度导致梯度下降法不能向准确的方向进行，模型存在欠拟合。另一方面，这种不准确性随着batch-size增加而降低，当batch-size上升到512时，识别率和损失值都有显著的改善。然而，继续增加该参数到一千以上时，验证集指标有轻微的恶化。这表明精确的梯度计算不但不是必要的，反而对泛化性有伤害。可以总结为，在相等训练误差的条件下，越小的batch-size应该对应越好的泛化性能。Nitishi等人认为这是因为小批量可以使得梯度下降法收敛于更加平坦的区域，并提出使用‘sharpness’来衡量平坦程度，该值被定义为损失函数在收敛点附近的最大值和收敛值的比值，并使用$L-BFGS​$求解，该指标一定程度上可以代表损失函数的二阶梯度。然而，在我们的实验中，小批量并不是一致性的对应小的‘sharpness’。
+
+| batch-size | sharpness |
+| ---------- | --------- |
+| 128        | 79.93     |
+| 256        | 131.28    |
+| 512        | 204.49    |
+| 1024       | 164.59    |
+| 2048       | 226.19    |
+| 4096       | 170.90    |
+
+
+
 #### 3.3 Dropout
 
 背景
@@ -280,7 +309,7 @@ $$
 
 每次前向计算时使用的$f$通过抽样得到，这意味着同一层的某些通道的对比度会被增强，而另一些被减弱，并且所有通道的累加会保持大致相等。我们也尝试了增强所有特征图的对比度，但是得到了更差的测试集识别率，这可能是因为扩增操作在训练集上引入了一个数值偏差。$\alpha$被经验性的设置为$0.25$。下面的图片展示了分别在原始图像和特征图上做对比度变换的效果。
 
-![contrast-adj](/Users/O/Downloads/contrast-adj.png)
+![contrast](https://ws1.sinaimg.cn/large/006tKfTcly1fn3icqb7msj30r20cbaqy.jpg)
 
 亮度变换也是简单常见的图像处理方法。图像的亮度反映了图像生成时环境中的光照强度，但是明暗变化一般不影响图像的类别，所以光照自然的可以被用来扩充数据集。亮度变换按照下面的式子计算
 $$
