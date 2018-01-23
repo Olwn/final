@@ -101,17 +101,17 @@ f(x+\epsilon) \approx f(x) + \epsilon f'(x)
 $$
 上式说明了当自变量发生小的变动时，函数值会如何变化，导数$f'(x)$其实是$f(x)$在$x$处的斜率。如果要使得函数值变小，即$\epsilon f'(x)<0$，只要使得自变量的偏移和导数的符号相反即可。实际应用中的目标函数通常是非线性的，为了不打破基本假设，更新量$\epsilon$必须很小，通常是小于1的浮点数。这就是Cauchy于1847年提出的梯度下降法。神经网络的参数多至数百万，所以优化函数的自变量是一个向量。对于这样的函数，有
 $$
-f(\textbf{x}+\textbf{u}) \approx f(\textbf{x}) + \textbf{u}^T \nabla_\textbf{x} {y}
+f(\mathbf{x}+\mathbf{u}) \approx f(\mathbf{x}) + \mathbf{u}^T \nabla_\mathbf{x} {y}
 $$
-其中$\nabla_\textbf{x} {y}$是$y$在$\textbf x$上的梯度，是一个长度为1的列向量。偏移量$\textbf u$不再只有正负两个方向的选择，而是可以向任意方向。为了推导出最优的移动方向，我们设$\textbf u$是单位向量，即$\textbf u^T \textbf u=1$。
+其中$\nabla_\mathbf{x} {y}$是$y$在$\mathbf x$上的梯度，是一个长度为1的列向量。偏移量$\mathbf u$不再只有正负两个方向的选择，而是可以向任意方向。为了推导出最优的移动方向，我们设$\mathbf u$是单位向量，即$\mathbf u^T \mathbf u=1$。
 $$
-\min_{\textbf u}  \textbf{u}^T \nabla_\textbf{x} {y}
-=\min_{\textbf u} ||\textbf u|| *  ||\nabla_\textbf{x} {y}|| \cos {\theta}
-=\min_{\textbf u} \cos \theta
+\min_{\mathbf u}  \mathbf{u}^T \nabla_\mathbf{x} {y}
+=\min_{\mathbf u} ||\mathbf u|| *  ||\nabla_\mathbf{x} {y}|| \cos {\theta}
+=\min_{\mathbf u} \cos \theta
 $$
-其中$\theta$是偏移量和梯度的夹角。显然，$\theta=180^0$的$\textbf u$是上式的解，即当自变量朝着梯度相反的反向偏移时函数值下降得最快。所以定义在多远函数上的梯度下降法的迭代公式是
+其中$\theta$是偏移量和梯度的夹角。显然，$\theta=180^0$的$\mathbf u$是上式的解，即当自变量朝着梯度相反的反向偏移时函数值下降得最快。所以定义在多远函数上的梯度下降法的迭代公式是
 $$
-\textbf x' = \textbf x - \epsilon \nabla_\textbf{x} {y}
+\mathbf x' = \mathbf x - \epsilon \nabla_\mathbf{x} {y}
 $$
 $\epsilon$被称为学习率，它决定了一次更新的长度，太小的值会使得下降过于缓慢，太大的值可能造成无法下降。该值的选取跟函数局部的曲率有关，当曲率较大时梯度变化较快，需使用小学习率；当曲率较小时线性度高，可以使用稍大的学习率加快下降速度。一些基于二阶梯度的优化方法就是利用了这样的基本原理，但是对于神经网络模型来说，求解黑塞矩阵的成本过于昂贵，所以牛顿方法等不会被用在神经网络训练。学习率的选取更多依靠经验和直觉，通过多次尝试的方法选择一个可行的较大的学习率，随着训练进行逐渐减小学习率。
 
